@@ -21,10 +21,11 @@ public class RobotTest extends OpMode {
 
 	@Override
 	public void init() {
-		bot = new Robot(this).enableIntake().enableHandsOfGod().enablePalmsOfGod();
+		bot = new Robot(this).enableIntake().enableHandsOfGod().enablePalmsOfGod().enableTurret();
 		mecanumDrive = new MecanumDrive(this);
 		mecanumDrive.init();
 		bot.init();
+		Robot.turret.useGamepad();
 		bot.camera.setTargetTag(Tag.PGP);
 //		bot.turret.useGamepad();
 
@@ -34,6 +35,16 @@ public class RobotTest extends OpMode {
 
 	@Override
 	public void loop() {
+		// enable or disable parts of the robot
+		if (gamepad2.dpad_up)
+			Robot.turretEnabled = !Robot.turretEnabled;
+		if (gamepad2.dpad_right)
+			Robot.intakeEnabled = !Robot.intakeEnabled;
+		if (gamepad2.dpad_down)
+			Robot.handsOfGodEnabled = !Robot.handsOfGodEnabled;
+		if (gamepad2.dpad_left)
+			Robot.drivetrainEnabled = !Robot.drivetrainEnabled;
+
 		mecanumDrive.loop();
 		bot.loop();
 
@@ -58,7 +69,10 @@ public class RobotTest extends OpMode {
 			}
 		}
 
-		Robot.intake.setHeight(gamepad2.left_trigger);
+		Robot.intake.setHeight(-gamepad2.right_stick_y);
+
+		Robot.turret.setAngle(-gamepad2.left_stick_y);
+		Robot.turret.setSpeed(gamepad2.left_trigger);
 
 		if (gamepad1.start) {
 			while (bot.shootAllTryingMotif().run(null)) {
@@ -66,7 +80,6 @@ public class RobotTest extends OpMode {
 		}
 
 		telemetry.addData("Ball", Robot.intake.getBallType().toString());
-		telemetry.update();
 
 		if (gamepad1.y)
 			bot.setBalls(new Field.Ball[]{Field.Ball.Purple, Field.Ball.Green, Field.Ball.Purple});

@@ -13,21 +13,16 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.RR.MecanumDrive;
 
 //Oh boy
-public class Turret {
+public class Turret extends RobotPart {
 	DcMotor rotator; //25 to 95 ratio, 1 full rotation is 2k steps
 	DcMotor spinner0, spinner1;
 	Servo angle;
-	OpMode opMode;
-	HardwareMap hardwareMap;
-	Telemetry telemetry;
 	Gamepad gamepad;
 	TouchSensor limit;
 	int maxAbsDelta = 2000;
@@ -48,9 +43,7 @@ public class Turret {
 	Vector2d adjustedTarget;
 
 	public Turret(OpMode opMode, TurretPose2d turretPose2d) {
-		this.opMode = opMode;
-		this.hardwareMap = opMode.hardwareMap;
-		this.telemetry = opMode.telemetry;
+		super(opMode);
 		gamepad = opMode.gamepad2;
 		pose = turretPose2d;
 	}
@@ -113,7 +106,7 @@ public class Turret {
 
 	public void loop() {
 		if (useGamepad) {
-			rotator.setPower(gamepad.right_stick_y);
+			rotator.setPower(gamepad.right_stick_y / 5);
 			if (gamepad.y) {
 				rotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 				rotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -146,8 +139,17 @@ public class Turret {
 
 
 		telemetry.addData("motorpos", rotator.getCurrentPosition());
-		telemetry.addData("limit", limit.getValue());
-		telemetry.update();
+	}
+
+	public Turret setSpeed(double speed) {
+		spinner0.setPower(speed);
+		spinner1.setPower(speed);
+		return this;
+	}
+
+	public Turret setAngle(double angle) {
+		this.angle.setPosition(angle);
+		return this;
 	}
 
 	/**
@@ -179,7 +181,6 @@ public class Turret {
 				telemetry.addData("error", error);
 				telemetry.addLine(String.format("x: %.3f, y: %.3f, t: %.3f", pose.pose2d.position.x, pose.pose2d.position.y, pose.pose2d.heading.toDouble()));
 				rotator.setPower(error * 10);
-				telemetry.update();
 				return true;
 			}
 		};
@@ -209,6 +210,11 @@ public class Turret {
 
 	/*
 	 * Thank you Mr. Cousineau, KVD, and the great tomeng70
+	 *
+	 * A brief explanation:
+	 * The turret knows where it is at all times. It knows this because it knows where it isn't. By subtracting where it is from where it isn't, or where it isn't from where it is (whichever is greater), it obtains a difference, or deviation. The guidance subsystem uses deviations to generate corrective commands to drive the turret from a position where it is to a position where it isn't, and arriving at a position where it wasn't, it now is. Consequently, the position where it is, is now the position that it wasn't, and it follows that the position that it was, is now the position that it isn't.
+	 * In the event that the position that it is in is not the position that it wasn't, the system has acquired a variation, the variation being the difference between where the turret is, and where it wasn't. If variation is considered to be a significant factor, it too may be corrected by the GEA. However, the turret must also know where it was.
+	 * The turret guidance computer scenario works as follows. Because a variation has modified some of the information the turret has obtained, it is not sure just where it is. However, it is sure where it isn't, within reason, and it knows where it was. It now subtracts where it should be from where it wasn't, or vice-versa, and by differentiating this from the algebraic sum of where it shouldn't be, and where it was, it is able to obtain the deviation and its variation, which is called error.
 	 */
 	public void updateTurretAngles() {
 		double viy, vix, dx, dy, t, vi, angle;

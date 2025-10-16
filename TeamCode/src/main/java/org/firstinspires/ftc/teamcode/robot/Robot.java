@@ -10,18 +10,12 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Class meant to easily hold all other robot classes, define positions and add methods as necessary
  * If you run into any null pointers check your enabled parts of the robot
  */
-public class Robot {
-	private OpMode opMode;
-	private HardwareMap hardwareMap;
-	private Telemetry telemetry;
+public class Robot extends RobotPart {
 	public static Drivetrain drivetrain;
 	public static boolean drivetrainEnabled;
 	public static Intake intake;
@@ -66,15 +60,15 @@ public class Robot {
 	 * @param opMode
 	 */
 	public Robot(OpMode opMode) {
-		this.opMode = opMode;
-		this.hardwareMap = opMode.hardwareMap;
-		this.telemetry = opMode.telemetry;
+		super(opMode);
 		drivetrain = new Drivetrain(hardwareMap, this.opMode);
 		intake = new Intake(this.opMode);
 		camera = new Camera(this.opMode);
 		turret = new Turret(this.opMode, new TurretPose2d(new Pose2d(0, 0, 0), 0));
 		handsOfGod = new HandsOfGod(this.opMode);
 		palmsOfGod = new PalmsOfGod(this.opMode);
+		voltageSensor = hardwareMap.voltageSensor.iterator()
+				.next(); // funky but also how RR gets voltage sensor
 	}
 
 	public Robot enablePalmsOfGod() {
@@ -107,6 +101,10 @@ public class Robot {
 //		return this;
 //	}
 
+	public double getVoltage() {
+		return voltageSensor.getVoltage();
+	}
+
 	public Robot enableCamera() {
 		cameraEnabled = true;
 		return this;
@@ -127,7 +125,11 @@ public class Robot {
 			palmsOfGod.init();
 	}
 
+	double currentTime = 0;
+
 	public void loop() {
+		telemetry.addData("time since last poll", opMode.getRuntime() - currentTime);
+		currentTime = opMode.getRuntime();
 		if (intakeEnabled)
 			intake.loop();
 		if (cameraEnabled)
@@ -136,6 +138,7 @@ public class Robot {
 			turret.loop();
 		if (handsOfGodEnabled)
 			handsOfGod.loop();
+		telemetry.update();
 	}
 
 	private double waitTime = 0;
@@ -155,7 +158,6 @@ public class Robot {
 	 */
 	public boolean shoot(BallPosition position) {
 		telemetry.addLine("rt: " + opMode.getRuntime() + " st " + startTime + " wt " + waitTime);
-		telemetry.update();
 		if (opMode.getRuntime() - startTime < waitTime) return true;
 
 		// If we are not shooting the hand ball but it is in the way we shoot the hand ball instead
