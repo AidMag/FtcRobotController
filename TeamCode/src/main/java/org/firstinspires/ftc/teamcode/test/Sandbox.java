@@ -71,8 +71,8 @@ public class Sandbox extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftDrive  = hardwareMap.get(DcMotor.class, "motorFL");
         rightDrive = hardwareMap.get(DcMotor.class, "motorFR");
-        backRightDrive = hardwareMap.get(DcMotor.class, "MotorBR");
-        backLeftDrive = hardwareMap.get(DcMotor.class, "MotorBL");
+        backRightDrive = hardwareMap.get(DcMotor.class, "motorBR");
+        backLeftDrive = hardwareMap.get(DcMotor.class, "motorBL");
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -96,11 +96,9 @@ public class Sandbox extends LinearOpMode {
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
-            double drive = -gamepad1.left_stick_y;
-            double turn  =  gamepad1.right_stick_x;
-            leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-            rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
-
+            rightPower = -gamepad1.left_stick_y;
+            leftPower  = -gamepad1.right_stick_x;
+            
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
             // leftPower  = -gamepad1.left_stick_y ;
@@ -109,8 +107,8 @@ public class Sandbox extends LinearOpMode {
             // Send calculated power to wheels
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
-            backLeftDrive.setPower(leftPower);
-            backRightDrive.setPower(rightPower);
+            backLeftDrive.setPower(rightPower);
+            backRightDrive.setPower(leftPower);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
