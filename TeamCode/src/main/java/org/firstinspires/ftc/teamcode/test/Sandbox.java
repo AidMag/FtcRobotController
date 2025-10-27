@@ -78,8 +78,8 @@ public class Sandbox extends LinearOpMode {
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         leftDrive.setDirection(DcMotor.Direction.REVERSE);
         rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        backRightDrive.setDirection(DcMotor.Direction.REVERSE);
-        backLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         // Wait for the game to start (driver presses START)
         waitForStart();
         runtime.reset();
@@ -97,7 +97,7 @@ public class Sandbox extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
             rightPower = -gamepad1.left_stick_y;
-            leftPower  = -gamepad1.right_stick_x;
+            leftPower  = -gamepad1.right_stick_y;
             
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
@@ -107,8 +107,8 @@ public class Sandbox extends LinearOpMode {
             // Send calculated power to wheels
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
-            backLeftDrive.setPower(rightPower);
-            backRightDrive.setPower(leftPower);
+            backLeftDrive.setPower(leftPower);
+            backRightDrive.setPower(rightPower);
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
