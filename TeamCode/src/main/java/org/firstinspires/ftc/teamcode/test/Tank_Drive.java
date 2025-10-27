@@ -29,12 +29,10 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 
 /*
@@ -52,7 +50,7 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="First Demos", group="Tom")
 //@Disabled
-public class Sandbox extends LinearOpMode {
+public class Tank_Drive extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -96,8 +94,8 @@ public class Sandbox extends LinearOpMode {
 
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
-            rightPower = -gamepad1.left_stick_y;
-            leftPower  = -gamepad1.right_stick_y;
+            rightPower = -gamepad1.right_stick_y;
+            leftPower  = -gamepad1.left_stick_y;
             
             // Tank Mode uses one stick to control each wheel.
             // - This requires no math, but it is hard to drive forward slowly and keep straight.
